@@ -16,7 +16,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 @OnlyIn(Dist.CLIENT)
 public final class WorldEventHandler {
 
-    private static final AnimationHandler handler = ChunkAnimator.INSTANCE.animationHandler;
+    private static final AnimationHandler handler = ChunkAnimator.animationHandler();
 
     @SubscribeEvent
     public void worldUnload (final WorldEvent.Unload event) {

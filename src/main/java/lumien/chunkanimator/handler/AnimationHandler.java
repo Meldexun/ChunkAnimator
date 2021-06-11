@@ -28,8 +28,8 @@ public class AnimationHandler {
 	private final Minecraft mc = Minecraft.getInstance();
 	private final WeakHashMap<ChunkRenderDispatcher.ChunkRender, AnimationData> timeStamps = new WeakHashMap<>();
 
-	public void preRender(final ChunkRenderDispatcher.ChunkRender renderChunk, @Nullable final MatrixStack matrixStack) {
-		final AnimationData animationData = timeStamps.get(renderChunk);
+	public void preRender(final ChunkRenderDispatcher.ChunkRender chunkRender, @Nullable final MatrixStack matrixStack) {
+		final AnimationData animationData = timeStamps.get(chunkRender);
 
 		if (animationData == null)
 			return;
@@ -48,14 +48,14 @@ public class AnimationHandler {
 			// If using mode 4, set chunkFacing.
 			if (mode == 4) {
 				animationData.chunkFacing = this.mc.player != null ?
-						this.getChunkFacing(this.getZeroedPlayerPos(this.mc.player).subtract(this.getZeroedCenteredChunkPos(renderChunk.getOrigin()))) : Direction.NORTH;
+						this.getChunkFacing(this.getZeroedPlayerPos(this.mc.player).subtract(this.getZeroedCenteredChunkPos(chunkRender.getOrigin()))) : Direction.NORTH;
 			}
 		}
 
 		final long timeDif = System.currentTimeMillis() - time;
 
 		if (timeDif < animationDuration) {
-			final int chunkY = renderChunk.getOrigin().getY();
+			final int chunkY = chunkRender.getOrigin().getY();
 			final int animationMode = mode == 2 ? (chunkY < Objects.requireNonNull(this.mc.level).getLevelData().getHorizonHeight() ? 0 : 1) : mode == 4 ? 3 : mode;
 
 			switch (animationMode) {
@@ -77,7 +77,7 @@ public class AnimationHandler {
 					break;
 			}
 		} else {
-			this.timeStamps.remove(renderChunk);
+			this.timeStamps.remove(chunkRender);
 		}
 	}
 

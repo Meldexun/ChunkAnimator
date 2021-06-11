@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "lumien.chunkanimator.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "chunkanimator.refmap.json",
+  "mixins": [
+    "ChunkRenderMixin",
+    "WorldRendererMixin"
+  ],
+  "minVersion": "0.8"
+}

@@ -1,15 +1,17 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
         mavenCentral()
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
@@ -39,6 +41,8 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
 
+            arg "-mixin.config=" + config.mod_id + ".mixins.json"
+
             mods {
                 chunkanimator {
                     source sourceSets.main
@@ -52,6 +56,8 @@ minecraft {
             property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
             property 'forge.logging.console.level', 'debug'
 
+            arg "-mixin.config=" + config.mod_id + ".mixins.json"
+
             mods {
                 chunkanimator {
                     source sourceSets.main
@@ -61,8 +67,14 @@ minecraft {
     }
 }
 
+mixin {
+    add sourceSets.main, "${config.mod_id}.refmap.json"
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${config.mc_version}-${config.forge_version}"
+
+    annotationProcessor "org.spongepowered:mixin:0.8.2:processor"
 }
 
 jar {
@@ -74,7 +86,8 @@ jar {
                 "Implementation-Title": project.name,
                 "Implementation-Version": project.version,
                 "Implementation-Vendor" : "Harley O'Connor", // I am the author of this port.
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConfigs": "${config.mod_id}.mixins.json"
         ])
     }
 }

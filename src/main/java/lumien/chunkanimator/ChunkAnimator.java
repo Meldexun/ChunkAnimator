@@ -23,7 +23,7 @@ public class ChunkAnimator {
 
 	public static ChunkAnimator INSTANCE;
 
-	public AnimationHandler animationHandler;
+	private AnimationHandler animationHandler;
 
 	public ChunkAnimator() {
 		INSTANCE = this;
@@ -45,6 +45,10 @@ public class ChunkAnimator {
 		this.animationHandler = new AnimationHandler();
 
 		MinecraftForge.EVENT_BUS.register(new WorldEventHandler());
+	}
+
+	public static AnimationHandler animationHandler() {
+		return INSTANCE.animationHandler;
 	}
 
 }

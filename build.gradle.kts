@@ -8,6 +8,7 @@ plugins {
     id("net.minecraftforge.gradle")
     id("idea")
     id("maven-publish")
+    id("com.matthewprenger.cursegradle") version "1.4.0"
 }
 
 val modName = property("modName")
@@ -75,7 +76,12 @@ tasks.jar {
             "Implementation-Timestamp" to DateTimeFormatter.ISO_INSTANT.format(Instant.now())
     )
 
+    archiveBaseName.set(modName)
     finalizedBy("reobfJar")
+}
+
+tasks.withType<GenerateModuleMetadata> {
+    enabled = false
 }
 
 publishing {
@@ -114,6 +120,7 @@ publishing {
         maven("file:///${project.projectDir}/mcmodsrepo")
         if (hasProperty("harleyOConnorMavenUsername") && hasProperty("harleyOConnorMavenPassword")) {
             maven("https://harleyoconnor.com/maven") {
+                name = "HarleyOConnor"
                 credentials {
                     username = property("harleyOConnorMavenUsername")
                     password = property("harleyOConnorMavenPassword")
@@ -122,5 +129,25 @@ publishing {
         } else {
             logger.log(LogLevel.WARN, "Credentials for maven not detected; it will be disabled.")
         }
+    }
+}
+
+curseforge {
+    if (project.hasProperty("curseApiKey") && project.hasProperty("curseFileType")) {
+        apiKey = property("curseApiKey")
+
+        project(closureOf<com.matthewprenger.cursegradle.CurseProject> {
+            id = "236484"
+
+            addGameVersion(mcVersion)
+
+            changelog = file("build/changelog.md")
+            changelogType = "markdown"
+            releaseType = property("curseFileType")
+
+            addArtifact(tasks.findByName("sourcesJar"))
+        })
+    } else {
+        project.logger.log(LogLevel.WARN, "API Key and file type for CurseForge not detected; uploading will be disabled.")
     }
 }

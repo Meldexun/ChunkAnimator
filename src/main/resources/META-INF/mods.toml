@@ -19,7 +19,7 @@ A small client side mod that animates the appeareance of chunks so that they don
 '''
 
 displayURL="https://www.curseforge.com/minecraft/mc-mods/chunkanimator"
-updateJSONURL="https://github.com/Harleyoc1/ChunkAnimator/blob/1.16.5/version_info.json?raw=true"
+updateJSONURL="https://github.com/Harleyoc1/ChunkAnimator/blob/1.17.1/version_info.json?raw=true"
 
 [[dependencies.chunkanimator]]
     modId="forge"

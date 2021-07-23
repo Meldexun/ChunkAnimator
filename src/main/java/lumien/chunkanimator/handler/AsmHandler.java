@@ -1,15 +1,15 @@
 package lumien.chunkanimator.handler;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.shaders.Uniform;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Matrix4f;
 import lumien.chunkanimator.ChunkAnimator;
+import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraft.client.renderer.WorldRenderer;
-
-import javax.annotation.Nullable;
 
 /**
  * This class acts as a "middle man" between Minecraft's transformed classes and
@@ -18,38 +18,45 @@ import javax.annotation.Nullable;
  * @author lumien231
  */
 @OnlyIn(Dist.CLIENT)
-public class AsmHandler {
+public final class AsmHandler {
 
-	private static final AnimationHandler HANDLER = ChunkAnimator.INSTANCE.animationHandler;
+	private AsmHandler() {}
+
+	private static final AnimationHandler HANDLER = ChunkAnimator.instance.animationHandler;
 
 	/**
-	 * Calls {@link AnimationHandler#setOrigin(ChunkRenderDispatcher.ChunkRender, BlockPos)} with
+	 * Calls {@link AnimationHandler#setOrigin(ChunkRenderDispatcher.RenderChunk, BlockPos)} with
 	 * the given parameters.
 	 *
-	 * <p>The {@link ChunkRenderDispatcher.ChunkRender} transformer invokes this method, inserting
-	 * the call in {@link ChunkRenderDispatcher.ChunkRender#setOrigin(int, int, int)}.</p>
+	 * <p>The {@link ChunkRenderDispatcher.RenderChunk} transformer invokes this method, inserting
+	 * the call in {@link ChunkRenderDispatcher.RenderChunk#setOrigin(int, int, int)}.</p>
 	 *
-	 * @param renderChunk The {@link ChunkRenderDispatcher.ChunkRender} instance.
-	 * @param originX The {@code x-coordinate} for the origin.
-	 * @param originY The {@code y-coordinate} for the origin.
-	 * @param originZ The {@code z-coordinate} for the origin.
+	 * @param renderChunk The {@link ChunkRenderDispatcher.RenderChunk} instance.
+	 * @param x The {@code x-coordinate} for the origin.
+	 * @param y The {@code y-coordinate} for the origin.
+	 * @param z The {@code z-coordinate} for the origin.
 	 */
-	public static void setOrigin(ChunkRenderDispatcher.ChunkRender renderChunk, int originX, int originY, int originZ) {
-		HANDLER.setOrigin(renderChunk, new BlockPos(originX, originY, originZ));
+	public static void setOrigin(ChunkRenderDispatcher.RenderChunk renderChunk, int x, int y, int z) {
+		HANDLER.setOrigin(renderChunk, new BlockPos(x, y, z));
 	}
 
 	/**
-	 * Calls {@link AnimationHandler#preRender(ChunkRenderDispatcher.ChunkRender, MatrixStack)}
+	 * Calls {@link AnimationHandler#preRender(ChunkRenderDispatcher.RenderChunk, Uniform, float, float, float)}
 	 * with the given parameters.
 	 *
-	 * <p>The {@link WorldRenderer} transformer invokes this method, inserting the call in
-	 * {@link WorldRenderer#renderChunkLayer(RenderType, MatrixStack, double, double, double)}.</p>
+	 * <p>The {@link LevelRenderer} transformer invokes this method, replacing the default
+	 * {@link Uniform#set(float, float, float)} call in
+	 * {@link LevelRenderer#renderChunkLayer(RenderType, PoseStack, double, double, double, Matrix4f)}.
 	 *
-	 * @param renderChunk The {@link ChunkRenderDispatcher.ChunkRender} instance.
-	 * @param matrixStack The {@link MatrixStack}, or {@code null} if using OptiFine.
+	 * @param uniform The chunk offset {@link Uniform} object.
+	 * @param x The final x-coordinate for the chunk (where it should end up).
+	 * @param y The final y-coordinate for the chunk (where it should end up).
+	 * @param z The final z-coordinate for the chunk (where it should end up).
+	 * @param renderChunk The {@link ChunkRenderDispatcher.RenderChunk} instance.
 	 */
-	public static void preRenderChunk(final ChunkRenderDispatcher.ChunkRender renderChunk, final @Nullable MatrixStack matrixStack) {
-		HANDLER.preRender(renderChunk, matrixStack);
+	public static void preRenderChunk(final Uniform uniform, final float x, final float y, final float z,
+									  final ChunkRenderDispatcher.RenderChunk renderChunk) {
+		HANDLER.preRender(renderChunk, uniform, x, y, z);
 	}
 
 }

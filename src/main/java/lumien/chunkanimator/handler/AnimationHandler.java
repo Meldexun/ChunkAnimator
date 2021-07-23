@@ -1,19 +1,17 @@
 package lumien.chunkanimator.handler;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.shaders.Uniform;
 import lumien.chunkanimator.config.ChunkAnimatorConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import penner.easing.*;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.WeakHashMap;
 
@@ -23,16 +21,19 @@ import java.util.WeakHashMap;
  * @author lumien231
  */
 @OnlyIn(Dist.CLIENT)
-public class AnimationHandler {
+public final class AnimationHandler {
 
 	private final Minecraft mc = Minecraft.getInstance();
-	private final WeakHashMap<ChunkRenderDispatcher.ChunkRender, AnimationData> timeStamps = new WeakHashMap<>();
+	private final WeakHashMap<ChunkRenderDispatcher.RenderChunk, AnimationData> timeStamps = new WeakHashMap<>();
 
-	public void preRender(final ChunkRenderDispatcher.ChunkRender renderChunk, @Nullable final MatrixStack matrixStack) {
+	public void preRender(final ChunkRenderDispatcher.RenderChunk renderChunk, final Uniform uniform,
+						  final float x, final float y, final float z) {
 		final AnimationData animationData = timeStamps.get(renderChunk);
 
-		if (animationData == null)
+		if (animationData == null) {
+			uniform.set(x, y, z);
 			return;
+		}
 
 		final int mode = ChunkAnimatorConfig.MODE.get();
 		final int animationDuration = ChunkAnimatorConfig.ANIMATION_DURATION.get();
@@ -56,46 +57,25 @@ public class AnimationHandler {
 
 		if (timeDif < animationDuration) {
 			final int chunkY = renderChunk.getOrigin().getY();
-			final int animationMode = mode == 2 ? (chunkY < Objects.requireNonNull(this.mc.level).getLevelData().getHorizonHeight() ? 0 : 1) : mode == 4 ? 3 : mode;
+			final int animationMode = mode == 2 ? (chunkY < Objects.requireNonNull(this.mc.level)
+					.getLevelData().getHorizonHeight(this.mc.level) ? 0 : 1) : mode == 4 ? 3 : mode;
 
 			switch (animationMode) {
-				case 0:
-					this.translate(matrixStack, 0, -chunkY + this.getFunctionValue(timeDif, 0, chunkY, animationDuration), 0);
-					break;
-				case 1:
-					this.translate(matrixStack, 0, 256 - chunkY - this.getFunctionValue(timeDif, 0, 256 - chunkY, animationDuration), 0);
-					break;
-				case 3:
+				case 0 -> uniform.set(x, y - chunkY + this.getFunctionValue(timeDif, 0, chunkY, animationDuration), z);
+				case 1 -> uniform.set(x, y + 256 - chunkY - this.getFunctionValue(timeDif, 0, 256 - chunkY, animationDuration), z);
+				case 3 -> {
 					Direction chunkFacing = animationData.chunkFacing;
-
 					if (chunkFacing != null) {
-						final Vector3i vec = chunkFacing.getNormal();
-						final double mod = -(200 - this.getFunctionValue(timeDif, 0, 200, animationDuration));
+						final Vec3i vec = chunkFacing.getNormal();
+						final float mod = -(200F - this.getFunctionValue(timeDif, 0, 200, animationDuration));
 
-						this.translate(matrixStack, vec.getX() * mod, 0, vec.getZ() * mod);
+						uniform.set(x + vec.getX() * mod, y, z +  vec.getZ() * mod);
 					}
-					break;
+				}
 			}
 		} else {
+			uniform.set(x, y, z);
 			this.timeStamps.remove(renderChunk);
-		}
-	}
-
-	/**
-	 * Translates with correct method, depending on whether OptiFine is installed ({@link MatrixStack}
-	 * not used so set to null), or not.
-	 *
-	 * @param matrixStack The {@link MatrixStack} object, or null if OptiFine is loaded.
-	 * @param x The x to translate by.
-	 * @param y The y to translate by.
-	 * @param z The z to translate by.
-	 */
-	@SuppressWarnings("deprecation")
-	private void translate (@Nullable final MatrixStack matrixStack, final double x, final double y, final double z) {
-		if (matrixStack == null) {
-			GlStateManager._translated(x, y, z); // OptiFine still uses GlStateManager.
-		} else {
-			matrixStack.translate(x, y, z);
 		}
 	}
 
@@ -109,35 +89,35 @@ public class AnimationHandler {
 	 * @return The return value of the function.
 	 */
 	private float getFunctionValue(final float t, @SuppressWarnings("SameParameterValue") final float b, final float c, final float d) {
-		switch (ChunkAnimatorConfig.EASING_FUNCTION.get()) {
-			case 0: // Linear
-				return Linear.easeOut(t, b, c, d);
-			case 1: // Quadratic Out
-				return Quad.easeOut(t, b, c, d);
-			case 2: // Cubic Out
-				return Cubic.easeOut(t, b, c, d);
-			case 3: // Quartic Out
-				return Quart.easeOut(t, b, c, d);
-			case 4: // Quintic Out
-				return Quint.easeOut(t, b, c, d);
-			case 5: // Expo Out
-				return Expo.easeOut(t, b, c, d);
-			case 6: // Sin Out
-				return Sine.easeOut(t, b, c, d);
-			case 7: // Circle Out
-				return Circ.easeOut(t, b, c, d);
-			case 8: // Back
-				return Back.easeOut(t, b, c, d);
-			case 9: // Bounce
-				return Bounce.easeOut(t, b, c, d);
-			case 10: // Elastic
-				return Elastic.easeOut(t, b, c, d);
-		}
+		return switch (ChunkAnimatorConfig.EASING_FUNCTION.get()) {
+			case 0 -> // Linear
+					Linear.easeOut(t, b, c, d);
+			case 1 -> // Quadratic Out
+					Quad.easeOut(t, b, c, d);
+			case 2 -> // Cubic Out
+					Cubic.easeOut(t, b, c, d);
+			case 3 -> // Quartic Out
+					Quart.easeOut(t, b, c, d);
+			case 4 -> // Quintic Out
+					Quint.easeOut(t, b, c, d);
+			case 5 -> // Expo Out
+					Expo.easeOut(t, b, c, d);
+			case 6 -> // Sin Out
+					Sine.easeOut(t, b, c, d);
+			case 7 -> // Circle Out
+					Circ.easeOut(t, b, c, d);
+			case 8 -> // Back
+					Back.easeOut(t, b, c, d);
+			case 9 -> // Bounce
+					Bounce.easeOut(t, b, c, d);
+			case 10 -> // Elastic
+					Elastic.easeOut(t, b, c, d);
+			default -> Sine.easeOut(t, b, c, d);
+		};
 
-		return Sine.easeOut(t, b, c, d);
 	}
 
-	public void setOrigin(final ChunkRenderDispatcher.ChunkRender renderChunk, final BlockPos position) {
+	public void setOrigin(final ChunkRenderDispatcher.RenderChunk renderChunk, final BlockPos position) {
 		if (this.mc.player == null)
 			return;
 
@@ -155,10 +135,10 @@ public class AnimationHandler {
 	/**
 	 * Gets the given player's position, setting their {@code y-coordinate} to {@code 0}.
 	 *
-	 * @param player The {@link ClientPlayerEntity} instance.
+	 * @param player The {@link LocalPlayer} instance.
 	 * @return The zeroed {@link BlockPos}.
 	 */
-	private BlockPos getZeroedPlayerPos (final ClientPlayerEntity player) {
+	private BlockPos getZeroedPlayerPos (final LocalPlayer player) {
 		final BlockPos playerPos = player.blockPosition();
 		return playerPos.offset(0, -playerPos.getY(), 0);
 	}
@@ -175,13 +155,13 @@ public class AnimationHandler {
 	}
 
 	/**
-	 * Gets the direction the chunk is facing based on the given {@link Vector3i}
+	 * Gets the direction the chunk is facing based on the given {@link Vec3i}
 	 * from the relevant position to the chunk.
 	 *
-	 * @param dif The {@link Vector3i} distance from the relevant position to the chunk.
+	 * @param dif The {@link Vec3i} distance from the relevant position to the chunk.
 	 * @return The {@link Direction} of the chunk relative to the {@code dif}.
 	 */
-	private Direction getChunkFacing(final Vector3i dif) {
+	private Direction getChunkFacing(final Vec3i dif) {
 		int difX = Math.abs(dif.getX());
 		int difZ = Math.abs(dif.getZ());
 

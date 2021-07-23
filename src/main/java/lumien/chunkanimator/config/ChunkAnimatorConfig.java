@@ -7,7 +7,7 @@ import net.minecraftforge.common.ForgeConfigSpec.IntValue;
 /**
  * @author lumien231
  */
-public class ChunkAnimatorConfig {
+public final class ChunkAnimatorConfig {
 
 	/** The animation mode - controls how the chunks should be animated. */
 	public static final IntValue MODE;
@@ -45,5 +45,7 @@ public class ChunkAnimatorConfig {
 
 		SPEC = builder.build();
 	}
+
+	private ChunkAnimatorConfig() {}
 
 }

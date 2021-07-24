@@ -1,3 +1,8 @@
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.matthewprenger.cursegradle.CurseProject
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.time.Instant
 import java.time.format.DateTimeFormatter
 
@@ -132,16 +137,24 @@ publishing {
     }
 }
 
+fun readChangelog(): String {
+    val versionInfoFile = file("version_info.json")
+    val jsonObject = Gson().fromJson(InputStreamReader(versionInfoFile.inputStream()), JsonObject::class.java)
+    return jsonObject
+        .get(mcVersion).asJsonObject
+        .get(project.version.toString()).asString
+}
+
 curseforge {
     if (project.hasProperty("curseApiKey") && project.hasProperty("curseFileType")) {
         apiKey = property("curseApiKey")
 
-        project(closureOf<com.matthewprenger.cursegradle.CurseProject> {
+        project(closureOf<CurseProject> {
             id = "236484"
 
             addGameVersion(mcVersion)
 
-            changelog = file("build/changelog.md")
+            changelog = readChangelog()
             changelogType = "markdown"
             releaseType = property("curseFileType")
 

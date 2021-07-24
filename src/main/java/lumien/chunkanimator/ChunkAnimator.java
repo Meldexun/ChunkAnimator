@@ -28,8 +28,7 @@ public final class ChunkAnimator {
 	public ChunkAnimator() {
 		instance = this;
 
-		final ModLoadingContext loadingContext = ModLoadingContext.get();
-
+		final var loadingContext = ModLoadingContext.get();
 		loadingContext.registerExtensionPoint(
 				IExtensionPoint.DisplayTest.class,
 				() -> new IExtensionPoint.DisplayTest(() -> FMLNetworkConstants.IGNORESERVERONLY, (a, b) -> true)

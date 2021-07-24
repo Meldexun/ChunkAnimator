@@ -33,7 +33,7 @@ public final class AnimationHandler {
 			return;
 		}
 
-		final AnimationMode mode = ChunkAnimatorConfig.MODE.get();
+		final var mode = ChunkAnimatorConfig.MODE.get();
 		final int animationDuration = ChunkAnimatorConfig.ANIMATION_DURATION.get();
 
 		long time = animationData.timeStamp;

@@ -8,19 +8,19 @@ function initializeCoreMod() {
                 'methodDesc': '(III)V'
             },
             'transformer': function (methodNode) {
-                var Opcodes = Java.type("org.objectweb.asm.Opcodes");
-                var ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
+                const Opcodes = Java.type("org.objectweb.asm.Opcodes");
+                const ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
 
-                var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
-                var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode");
+                const MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
+                const VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode");
 
-                var code = methodNode.instructions;
-                var instr = code.toArray();
+                const code = methodNode.instructions;
+                const instr = code.toArray();
 
-                var resetInstr = null;
+                let resetInstr = null;
 
                 for (i in instr) {
-                    var instruction = instr[i];
+                    const instruction = instr[i];
 
                     if (instruction instanceof MethodInsnNode &&
                         (instruction.name === "reset" || instruction.name === "m_112846_")) {

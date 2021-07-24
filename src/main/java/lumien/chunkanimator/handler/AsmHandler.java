@@ -41,7 +41,7 @@ public final class AsmHandler {
 	}
 
 	/**
-	 * Calls {@link AnimationHandler#preRender(ChunkRenderDispatcher.RenderChunk, Uniform, float, float, float)}
+	 * Calls {@link AnimationHandler#preRender(PreRenderContext)}
 	 * with the given parameters.
 	 *
 	 * <p>The {@link LevelRenderer} transformer invokes this method, replacing the default
@@ -56,7 +56,7 @@ public final class AsmHandler {
 	 */
 	public static void preRenderChunk(final Uniform uniform, final float x, final float y, final float z,
 									  final ChunkRenderDispatcher.RenderChunk renderChunk) {
-		HANDLER.preRender(renderChunk, uniform, x, y, z);
+		HANDLER.preRender(new PreRenderContext(renderChunk, uniform, x, y, z));
 	}
 
 }

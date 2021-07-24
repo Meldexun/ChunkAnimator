@@ -17,7 +17,7 @@ import net.minecraftforge.fmllegacy.network.FMLNetworkConstants;
  * @author lumien231
  */
 @Mod(ChunkAnimator.MOD_ID)
-public class ChunkAnimator {
+public final class ChunkAnimator {
 
 	public static final String MOD_ID = "chunkanimator";
 

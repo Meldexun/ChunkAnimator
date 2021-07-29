@@ -8,19 +8,19 @@ function initializeCoreMod() {
                 'methodDesc': '(Lnet/minecraft/client/renderer/RenderType;Lcom/mojang/blaze3d/vertex/PoseStack;DDDLcom/mojang/math/Matrix4f;)V'
             },
             'transformer': function (methodNode) {
-                const Opcodes = Java.type("org.objectweb.asm.Opcodes");
-                const ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
+                var Opcodes = Java.type("org.objectweb.asm.Opcodes");
+                var ASMAPI = Java.type("net.minecraftforge.coremod.api.ASMAPI");
 
-                const MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
-                const VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode");
+                var MethodInsnNode = Java.type("org.objectweb.asm.tree.MethodInsnNode");
+                var VarInsnNode = Java.type("org.objectweb.asm.tree.VarInsnNode");
 
-                const code = methodNode.instructions;
-                const instr = code.toArray();
+                var code = methodNode.instructions;
+                var instr = code.toArray();
 
-                let setInstr = null;
+                var setInstr = null;
 
                 for (i in instr) {
-                    const instruction = instr[i];
+                    var instruction = instr[i];
 
                     if (instruction instanceof MethodInsnNode &&
                         (instruction.name === "set" || instruction.name === "m_5889_") &&

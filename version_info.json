@@ -1,6 +1,7 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/chunk-animator",
   "1.17.1": {
+    "1.17.1-1.3.2": "No one reported that the last version was entirely dysfunctional... Anyway, this version fixes tht.\n\n Bug Fixes:\n- Fixed error in transformer JS.",
     "1.17.1-1.3.1": "Small release with some config and code changes. Note that due to the config changes, the mode and easing function options will be reset to their default.\n\nChanges:\n- Background code cleanup/changes.\n- Config now uses Enums instead of reference numbers for the mode and easing function.",
     "1.17.1-1.3.0": "Initial release for 1.17.1."
   },

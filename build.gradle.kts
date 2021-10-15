@@ -1,7 +1,7 @@
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.matthewprenger.cursegradle.CurseProject
-import java.io.InputStream
+import net.minecraftforge.gradle.common.util.RunConfig
 import java.io.InputStreamReader
 import java.time.Instant
 import java.time.format.DateTimeFormatter
@@ -11,6 +11,8 @@ fun property(key: String) = project.findProperty(key).toString()
 plugins {
     id("java")
     id("net.minecraftforge.gradle")
+    id("org.parchmentmc.librarian.forgegradle")
+    id("org.spongepowered.mixin")
     id("idea")
     id("maven-publish")
     id("com.matthewprenger.cursegradle") version "1.4.0"
@@ -26,40 +28,42 @@ version = "$mcVersion-$modVersion"
 group = property("group")
 
 minecraft {
-    mappings("official", mcVersion)
+    mappings("parchment", "${property("mappingsVersion")}-$mcVersion")
     accessTransformer(file("src/main/resources/META-INF/accesstransformer.cfg"))
 
     runs {
         create("client") {
             workingDirectory = file("run").absolutePath
 
-            property("forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP")
-            property("forge.logging.console.level", "debug")
+            this.applyDefaultConfiguration()
 
-            mods {
-                create(modId) {
-                    source(sourceSets.main.get())
-                }
+            if (project.hasProperty("mcUuid")) {
+                args("--uuid", property("mcUuid"))
+            }
+            if (project.hasProperty("mcUsername")) {
+                args("--username", property("mcUsername"))
+            }
+            if (project.hasProperty("mcAccessToken")) {
+                args("--accessToken", property("mcAccessToken"))
             }
         }
 
         create("server") {
-            workingDirectory = file("run").absolutePath
+            workingDirectory = file("run-server").absolutePath
 
-            property("forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP")
-            property("forge.logging.console.level", "debug")
-
-            mods {
-                create(modId) {
-                    source(sourceSets.main.get())
-                }
-            }
+            this.applyDefaultConfiguration()
         }
     }
 }
 
+mixin {
+    add(sourceSets.main.get(), "$modId.refmap.json")
+}
+
 dependencies {
     minecraft("net.minecraftforge:forge:$mcVersion-${property("forgeVersion")}")
+
+    annotationProcessor("org.spongepowered:mixin:${property("mixinVersion")}:processor")
 }
 
 java {
@@ -72,13 +76,14 @@ java {
 
 tasks.jar {
     manifest.attributes(
-            "Specification-Title" to project.name,
-            "Specification-Vendor" to "lumien231", // lumien231 was the original author of this mod.
-            "Specification-Version" to project.version,
-            "Implementation-Title" to project.name,
-            "Implementation-Version" to project.version,
-            "Implementation-Vendor" to "Harley O'Connor", // I am the author of this port.
-            "Implementation-Timestamp" to DateTimeFormatter.ISO_INSTANT.format(Instant.now())
+        "Specification-Title" to project.name,
+        "Specification-Vendor" to "lumien231", // lumien231 was the original author of this mod.
+        "Specification-Version" to project.version,
+        "Implementation-Title" to project.name,
+        "Implementation-Version" to project.version,
+        "Implementation-Vendor" to "Harley O'Connor", // I am the author of this port.
+        "Implementation-Timestamp" to DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
+        "MixinConfigs" to "$modId.mixins.json"
     )
 
     archiveBaseName.set(modName)
@@ -137,12 +142,12 @@ publishing {
     }
 }
 
-fun readChangelog(): String {
+fun readChangelog(): String? {
     val versionInfoFile = file("version_info.json")
     val jsonObject = Gson().fromJson(InputStreamReader(versionInfoFile.inputStream()), JsonObject::class.java)
     return jsonObject
-        .get(mcVersion).asJsonObject
-        .get(project.version.toString()).asString
+        ?.get(mcVersion)?.asJsonObject
+        ?.get(project.version.toString())?.asString
 }
 
 curseforge {
@@ -154,7 +159,7 @@ curseforge {
 
             addGameVersion(mcVersion)
 
-            changelog = readChangelog()
+            changelog = readChangelog() ?: ""
             changelogType = "markdown"
             releaseType = property("curseFileType")
 
@@ -162,5 +167,22 @@ curseforge {
         })
     } else {
         project.logger.log(LogLevel.WARN, "API Key and file type for CurseForge not detected; uploading will be disabled.")
+    }
+}
+
+fun RunConfig.applyDefaultConfiguration() {
+    property("forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP")
+    property("forge.logging.console.level", "debug")
+
+    property("mixin.debug.export", "true")
+    property("mixin.env.remapRefMap", "true")
+    property("mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg")
+
+    args("-mixin.config=$modId.mixins.json")
+
+    mods {
+        create(modId) {
+            source(sourceSets.main.get())
+        }
     }
 }

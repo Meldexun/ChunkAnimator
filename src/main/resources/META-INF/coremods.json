@@ -1,4 +1,0 @@
-{
-	"RenderChunk": "transformer/RenderChunk.js",
-	"LevelRenderer": "transformer/LevelRenderer.js"
-}

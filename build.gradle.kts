@@ -83,7 +83,7 @@ tasks.jar {
         "Implementation-Version" to project.version,
         "Implementation-Vendor" to "Harley O'Connor", // I am the author of this port.
         "Implementation-Timestamp" to DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
-        "MixinConfigs" to "$modId.mixins.json"
+        "MixinConnector" to "lumien.chunkanimator.MixinConnector"
     )
 
     archiveBaseName.set(modName)

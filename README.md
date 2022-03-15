@@ -3,8 +3,8 @@
 </h1>
 <p align="center">
   <a href="https://www.curseforge.com/minecraft/mc-mods/chunk-animator/">
-    <img src="http://cf.way2muchnoise.eu/versions/chunk-animator.svg" />
-    <img src="http://cf.way2muchnoise.eu/full_chunk-animator_downloads.svg" />
+    <img src="http://cf.way2muchnoise.eu/versions/236484.svg" />
+    <img src="http://cf.way2muchnoise.eu/full_236484_downloads.svg" />
   </a>
 </p>
 

@@ -17,26 +17,26 @@ import static lumien.chunkanimator.handler.AnimationHandler.*;
 public enum AnimationMode {
     BELOW(context -> context.uniform().set(
             context.x(),
-            context.y() - context.origin().getY() + getFunctionValue(
+            context.y() - Math.abs(context.origin().getY()) + getFunctionValue(
                     context.timeDif(),
                     0,
-                    context.origin().getY(),
+                    Math.abs(context.origin().getY()),
                     ChunkAnimatorConfig.ANIMATION_DURATION.get()
             ),
             context.z()
     )),
     ABOVE(context -> context.uniform().set(
             context.x(),
-            context.y() + 256 - context.origin().getY() - getFunctionValue(
+            context.y() + context.levelContext().maxY() - Math.abs(context.origin().getY()) - getFunctionValue(
                     context.timeDif(),
                     0,
-                    256 - context.origin().getY(),
+                    context.levelContext().maxY() - Math.abs(context.origin().getY()),
                     ChunkAnimatorConfig.ANIMATION_DURATION.get()
             ),
             context.z()
     )),
     HYBRID(context -> {
-        if (context.origin().getY() < context.horizonHeight()) {
+        if (context.origin().getY() < context.levelContext().horizonHeight()) {
             BELOW.contextConsumer.accept(context);
         } else {
             ABOVE.contextConsumer.accept(context);

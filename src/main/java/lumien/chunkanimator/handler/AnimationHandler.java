@@ -57,9 +57,7 @@ public final class AnimationHandler {
 					animationData,
 					context.renderChunk().getOrigin(),
 					timeDif,
-					Objects.requireNonNull(this.mc.level)
-							.getLevelData()
-							.getHorizonHeight(this.mc.level)
+					AnimationContext.LevelContext.from(Objects.requireNonNull(this.mc.level))
 			));
 		} else {
 			context.uniform().set(context.x(), context.y(), context.z());

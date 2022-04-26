@@ -1,6 +1,7 @@
 package lumien.chunkanimator.handler;
 
 import com.mojang.blaze3d.shaders.Uniform;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.chunk.ChunkRenderDispatcher;
 import net.minecraft.core.BlockPos;
 
@@ -18,5 +19,20 @@ public record AnimationContext(
         AnimationHandler.AnimationData animationData,
         BlockPos origin,
         float timeDif,
-        double horizonHeight
-) { }
+        LevelContext levelContext
+) {
+
+    public record LevelContext(
+            double horizonHeight,
+            int minY,
+            int maxY
+    ) {
+
+        public static LevelContext from(ClientLevel level) {
+            return new LevelContext(level.getLevelData().getHorizonHeight(level), level.dimensionType().minY(),
+                    level.dimensionType().minY() + level.dimensionType().height());
+        }
+
+    }
+
+}
